@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Grid2 as Grid,
+  Grid,
   TextField,
   Button,
   Link,
@@ -8,6 +8,7 @@ import {
   Container,
   Snackbar,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
@@ -18,16 +19,15 @@ export default function RegistrationComponent() {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [, setCookie] = useCookies(['FLOW', 'TOKEN']);
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // Function to validate email format
   const isValidEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
-  // Check if all fields are valid
   useEffect(() => {
     if (name.trim() !== '' && isValidEmail(email) && password.length >= 6) {
       setIsFormValid(true);
@@ -37,6 +37,7 @@ export default function RegistrationComponent() {
   }, [name, email, password]);
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       await axios.post(`${import.meta.env.VITE_BE_ENDPOINT}/user/register/`, {
         name,
@@ -50,6 +51,8 @@ export default function RegistrationComponent() {
     } catch (error) {
       console.error(error);
       setErrorMessage('Registration failed. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -121,9 +124,13 @@ export default function RegistrationComponent() {
             color="primary"
             fullWidth
             onClick={handleSubmit}
-            disabled={!isFormValid} // Disable button if form is invalid
+            disabled={!isFormValid || loading}
           >
-            Register
+            {loading ? (
+              <CircularProgress size={24} color="inherit" />
+            ) : (
+              'Register'
+            )}
           </Button>
         </Grid>
         <Grid
@@ -142,8 +149,6 @@ export default function RegistrationComponent() {
           </Link>
         </Grid>
       </Grid>
-
-      {/* Snackbar for success message */}
       <Snackbar
         open={successMessage}
         autoHideDuration={3000}
