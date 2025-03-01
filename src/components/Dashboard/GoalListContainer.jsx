@@ -180,7 +180,6 @@ export default function GoalListContainer() {
               onAchieved={() => markGoalAchieved(goal.id)}
               onDelete={() => deleteGoal(goal.id)}
               onFinalAchieved={() => finalAchieved(goal.id)}
-              id={goal.id}
             />
           ))}
         </Stack>
