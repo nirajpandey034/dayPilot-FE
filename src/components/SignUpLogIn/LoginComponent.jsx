@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Grid2 as Grid,
+  Grid,
   TextField,
   Button,
   Link,
   Typography,
   Container,
+  CircularProgress,
 } from '@mui/material';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
@@ -14,6 +15,7 @@ export default function LoginComponent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
   const [, setCookie] = useCookies(['FLOW', 'TOKEN']);
   const [isFormValid, setIsFormValid] = useState(false);
 
@@ -22,6 +24,7 @@ export default function LoginComponent() {
   }, [email, password]);
 
   const handleSubmit = async () => {
+    setLoading(true);
     try {
       const response = await axios.post(
         `${import.meta.env.VITE_BE_ENDPOINT}/user/login/`,
@@ -40,6 +43,8 @@ export default function LoginComponent() {
       setErrorMessage(
         error.response?.data?.message || 'Login failed. Please try again.'
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -91,9 +96,9 @@ export default function LoginComponent() {
             color="primary"
             fullWidth
             onClick={handleSubmit}
-            disabled={!isFormValid}
+            disabled={!isFormValid || loading}
           >
-            Login
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Login'}
           </Button>
         </Grid>
         <Grid item xs={12} sx={{ textAlign: 'center' }}>
