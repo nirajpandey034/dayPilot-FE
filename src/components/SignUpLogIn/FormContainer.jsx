@@ -17,7 +17,7 @@ export default function FormContainer() {
 
   return (
     <Grid container>
-      {cookies.FLOW === 'login' ? (
+      {cookies.FLOW !== 'registration' ? (
         <LoginComponent />
       ) : (
         <RegistrationComponent />

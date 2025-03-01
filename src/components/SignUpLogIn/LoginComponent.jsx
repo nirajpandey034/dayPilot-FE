@@ -28,11 +28,13 @@ export default function LoginComponent() {
         { email, password }
       );
 
-      console.log(response.data);
-
       // Save token in cookies
-      setCookie('TOKEN', response.data.token, { path: '/' });
+      setCookie('TOKEN', response.data.token, {
+        path: '/',
+        expires: new Date(Date.now() + 60 * 60 * 1000),
+      });
       setCookie('FLOW', 'dashboard', { path: '/' });
+      setCookie('USER_ID', response.data.id, { path: '/' });
     } catch (error) {
       console.error(error);
       setErrorMessage(
@@ -89,7 +91,7 @@ export default function LoginComponent() {
             color="primary"
             fullWidth
             onClick={handleSubmit}
-            disabled={!isFormValid} // Disable button if form is invalid
+            disabled={!isFormValid}
           >
             Login
           </Button>
