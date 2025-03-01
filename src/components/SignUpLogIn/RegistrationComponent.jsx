@@ -9,9 +9,14 @@ import {
   Snackbar,
   Alert,
   CircularProgress,
+  Paper,
+  InputAdornment,
 } from '@mui/material';
 import { useCookies } from 'react-cookie';
 import axios from 'axios';
+import MailIcon from '@mui/icons-material/Mail';
+import PasswordIcon from '@mui/icons-material/Password';
+import PersonIcon from '@mui/icons-material/Person';
 
 export default function RegistrationComponent() {
   const [name, setName] = useState('');
@@ -23,17 +28,12 @@ export default function RegistrationComponent() {
   const [, setCookie] = useCookies(['FLOW', 'TOKEN']);
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const isValidEmail = (email) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
+  const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
   useEffect(() => {
-    if (name.trim() !== '' && isValidEmail(email) && password.length >= 6) {
-      setIsFormValid(true);
-    } else {
-      setIsFormValid(false);
-    }
+    setIsFormValid(
+      name.trim() !== '' && isValidEmail(email) && password.length >= 6
+    );
   }, [name, email, password]);
 
   const handleSubmit = async () => {
@@ -45,110 +45,140 @@ export default function RegistrationComponent() {
         password,
       });
       setSuccessMessage(true);
-      setTimeout(() => {
-        setCookie('FLOW', 'login', { path: '/' });
-      }, 3000);
-    } catch (error) {
-      console.error(error);
+      setTimeout(() => setCookie('FLOW', 'login', { path: '/' }), 3000);
+    } catch (err) {
+      console.log(err);
       setErrorMessage('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    setCookie('FLOW', 'registration', { path: '/' });
-  }, [setCookie]);
-
   return (
-    <Container>
-      <Grid
-        container
-        spacing={2}
-        alignItems="center"
-        justifyContent="center"
-        flexDirection="column"
-        style={{ minHeight: '100vh' }}
+    <Container
+      maxWidth="xs"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Paper
+        elevation={6}
+        sx={{
+          p: 4,
+          width: { xs: '100%', sm: '28rem' },
+          borderRadius: 3,
+          backdropFilter: 'blur(10px)',
+        }}
       >
-        <Grid item xs={12} sx={{ width: { xs: '100%', sm: '30rem' } }}>
-          <TextField
-            label="Name"
-            variant="outlined"
-            fullWidth
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            error={name.trim() === ''}
-            helperText={name.trim() === '' ? 'Name is required' : ''}
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ width: { xs: '100%', sm: '30rem' } }}>
-          <TextField
-            label="Email"
-            variant="outlined"
-            fullWidth
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            error={email !== '' && !isValidEmail(email)}
-            helperText={
-              email !== '' && !isValidEmail(email) ? 'Enter a valid email' : ''
-            }
-          />
-        </Grid>
-        <Grid item xs={12} sx={{ width: { xs: '100%', sm: '30rem' } }}>
-          <TextField
-            label="Password"
-            type="password"
-            variant="outlined"
-            fullWidth
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            error={password !== '' && password.length < 6}
-            helperText={
-              password !== '' && password.length < 6
-                ? 'Password must be at least 6 characters'
-                : ''
-            }
-          />
-        </Grid>
-        {errorMessage && (
-          <Grid item xs={12} sx={{ width: { xs: '100%', sm: '30rem' } }}>
-            <Typography color="error">{errorMessage}</Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <Typography variant="h5" textAlign="center" fontWeight="bold">
+              Register Here
+            </Typography>
           </Grid>
-        )}
-        <Grid item xs={12}>
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            onClick={handleSubmit}
-            disabled={!isFormValid || loading}
-          >
-            {loading ? (
-              <CircularProgress size={24} color="inherit" />
-            ) : (
-              'Register'
-            )}
-          </Button>
+          <Grid item xs={12}>
+            <TextField
+              label="Name"
+              variant="outlined"
+              fullWidth
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PersonIcon />
+                  </InputAdornment>
+                ),
+              }}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              error={name.trim() === ''}
+              helperText={name.trim() === '' ? 'Name is required' : ''}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Email"
+              variant="outlined"
+              fullWidth
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <MailIcon />
+                  </InputAdornment>
+                ),
+              }}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              error={email !== '' && !isValidEmail(email)}
+              helperText={
+                email !== '' && !isValidEmail(email)
+                  ? 'Enter a valid email'
+                  : ''
+              }
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Password"
+              type="password"
+              variant="outlined"
+              fullWidth
+              required
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <PasswordIcon />
+                  </InputAdornment>
+                ),
+              }}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              error={password !== '' && password.length < 6}
+              helperText={
+                password !== '' && password.length < 6
+                  ? 'Password must be at least 6 characters'
+                  : ''
+              }
+            />
+          </Grid>
+          {errorMessage && (
+            <Grid item xs={12}>
+              <Typography color="error" textAlign="center">
+                {errorMessage}
+              </Typography>
+            </Grid>
+          )}
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              onClick={handleSubmit}
+              disabled={!isFormValid || loading}
+              sx={{ borderRadius: 2, py: 1 }}
+            >
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Register'
+              )}
+            </Button>
+          </Grid>
+          <Grid item xs={12} textAlign="center">
+            <Link
+              href="#"
+              variant="body2"
+              onClick={() => setCookie('FLOW', 'login', { path: '/' })}
+            >
+              Already have an account? Login here
+            </Link>
+          </Grid>
         </Grid>
-        <Grid
-          item
-          xs={12}
-          sx={{ width: { xs: '100%', sm: '30rem' }, textAlign: 'center' }}
-        >
-          <Link
-            href="#"
-            variant="body2"
-            onClick={() => {
-              setCookie('FLOW', 'login', { path: '/' });
-            }}
-          >
-            Already have an account? Login here
-          </Link>
-        </Grid>
-      </Grid>
+      </Paper>
       <Snackbar
         open={successMessage}
         autoHideDuration={3000}
