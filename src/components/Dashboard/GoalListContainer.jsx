@@ -12,6 +12,7 @@ import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import GoalTile from './GoalTile';
+import formatDate from '../../utils/DateFormat';
 
 const ITEMS_PER_PAGE = 3; // Number of goals per page
 
@@ -42,6 +43,37 @@ export default function GoalListContainer() {
       console.error('Error fetching goals:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const markGoalAchieved = async (id) => {
+    try {
+      const response = await axios.post(
+        `${import.meta.env.VITE_BE_ENDPOINT}/goal/mark`,
+        {
+          goalId: id,
+          date: formatDate(new Date()),
+          status: true,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.TOKEN}`,
+          },
+        }
+      );
+
+      if (response.status === 401) {
+        setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
+        navigate('/');
+      }
+      fetchGoals(); // Refresh goals after successful request
+    } catch (error) {
+      if (error.response?.status === 401) {
+        setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
+        navigate('/');
+      } else {
+        console.error('Error marking goal as achieved:', error);
+      }
     }
   };
 
@@ -96,7 +128,7 @@ export default function GoalListContainer() {
               key={goal.id}
               title={goal.title}
               description={goal.description}
-              onAchieved={() => console.log(`Achieved: ${goal.id}`)}
+              onAchieved={() => markGoalAchieved(goal.id)}
               onDelete={() => console.log(`Delete: ${goal.id}`)}
               onFinalAchieved={() => console.log(`Final Achieved: ${goal.id}`)}
             />

@@ -10,6 +10,7 @@ import {
 } from '@mui/material';
 import { useCookies } from 'react-cookie';
 import { useNavigate } from 'react-router-dom';
+import formatDate from '../../utils/DateFormat';
 
 export default function InputForm({ setRefreshList, refreshList }) {
   const [title, setTitle] = useState('');
@@ -49,16 +50,6 @@ export default function InputForm({ setRefreshList, refreshList }) {
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-  const formatDate = (input) => {
-    const date = new Date(input);
-    if (isNaN(date)) return 'Invalid Date'; // Handle invalid inputs
-
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Ensure 2 digits
-    const day = String(date.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
   };
   const submitGoal = async (goalData) => {
     try {
