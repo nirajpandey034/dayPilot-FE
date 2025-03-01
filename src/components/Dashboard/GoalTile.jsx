@@ -10,6 +10,7 @@ export default function GoalTile({
   onAchieved,
   onDelete,
   onFinalAchieved,
+  id,
 }) {
   return (
     <Card
@@ -26,7 +27,7 @@ export default function GoalTile({
     >
       <CardContent sx={{ textAlign: 'center' }}>
         <Typography variant="h6" fontWeight="bold">
-          {title}
+          {title} {id}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {description}

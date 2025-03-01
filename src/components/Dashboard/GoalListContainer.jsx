@@ -23,6 +23,10 @@ export default function GoalListContainer() {
   const [cookies, setCookie] = useCookies(['FLOW', 'TOKEN', 'USER_ID']);
   const navigate = useNavigate();
 
+  const handleUnauthorized = () => {
+    setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
+    navigate('/');
+  };
   const fetchGoals = async () => {
     try {
       setLoading(true);
@@ -34,13 +38,14 @@ export default function GoalListContainer() {
           },
         }
       );
-      if (response.status === 401) {
-        setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
-        navigate('/');
-      }
+      if (response.status === 401) handleUnauthorized();
       setGoals(response.data);
     } catch (error) {
-      console.error('Error fetching goals:', error);
+      if (error.response?.status === 401) {
+        handleUnauthorized();
+      } else {
+        console.error('Error fetching goals:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -61,16 +66,60 @@ export default function GoalListContainer() {
           },
         }
       );
+      if (response.status === 401) handleUnauthorized();
+      fetchGoals();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        handleUnauthorized();
+      } else {
+        console.error('Error marking goal as achieved:', error);
+      }
+    }
+  };
+
+  const deleteGoal = async (id) => {
+    try {
+      const response = await axios.delete(
+        `${import.meta.env.VITE_BE_ENDPOINT}/goal/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.TOKEN}`,
+          },
+        }
+      );
 
       if (response.status === 401) {
         setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
         navigate('/');
       }
-      fetchGoals(); // Refresh goals after successful request
+      fetchGoals();
     } catch (error) {
       if (error.response?.status === 401) {
         setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
         navigate('/');
+      } else {
+        console.error('Error marking goal as achieved:', error);
+      }
+    }
+  };
+
+  const finalAchieved = async (id) => {
+    try {
+      const response = await axios.put(
+        `${import.meta.env.VITE_BE_ENDPOINT}/goal/mark/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${cookies.TOKEN}`,
+          },
+        }
+      );
+
+      if (response.status === 401) handleUnauthorized();
+      fetchGoals();
+    } catch (error) {
+      if (error.response?.status === 401) {
+        handleUnauthorized();
       } else {
         console.error('Error marking goal as achieved:', error);
       }
@@ -129,8 +178,9 @@ export default function GoalListContainer() {
               title={goal.title}
               description={goal.description}
               onAchieved={() => markGoalAchieved(goal.id)}
-              onDelete={() => console.log(`Delete: ${goal.id}`)}
-              onFinalAchieved={() => console.log(`Final Achieved: ${goal.id}`)}
+              onDelete={() => deleteGoal(goal.id)}
+              onFinalAchieved={() => finalAchieved(goal.id)}
+              id={goal.id}
             />
           ))}
         </Stack>

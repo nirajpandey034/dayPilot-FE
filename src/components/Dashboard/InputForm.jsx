@@ -33,32 +33,23 @@ export default function InputForm({ setRefreshList, refreshList }) {
 
   const validate = () => {
     const newErrors = {};
-
-    if (title.trim().length < 3) {
+    if (title.trim().length < 3)
       newErrors.title = 'Title must be at least 3 characters long';
-    }
-
-    if (!frequency) {
-      newErrors.frequency = 'Please select a frequency';
-    }
-
+    if (!frequency) newErrors.frequency = 'Please select a frequency';
     if (!targetDate) {
       newErrors.targetDate = 'Target date is required';
     } else if (new Date(targetDate) < new Date().setHours(0, 0, 0, 0)) {
       newErrors.targetDate = 'Target date cannot be in the past';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
   const submitGoal = async (goalData) => {
     try {
       setLoading(true);
-      const token = cookies.TOKEN; // Fetch token from localStorage (or any other secure storage)
-
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
+      const token = cookies.TOKEN;
+      if (!token) throw new Error('No authentication token found');
 
       const response = await fetch(
         `${import.meta.env.VITE_BE_ENDPOINT}/goal/create/`,
@@ -66,7 +57,7 @@ export default function InputForm({ setRefreshList, refreshList }) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`, // Include Bearer Token
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             ...goalData,
@@ -77,9 +68,7 @@ export default function InputForm({ setRefreshList, refreshList }) {
         }
       );
 
-      if (!response.ok) {
-        throw new Error('Failed to submit goal');
-      }
+      if (!response.ok) throw new Error('Failed to submit goal');
       if (response.status === 401) {
         setCookie('TOKEN', '', { path: '/', expires: new Date(0) });
         navigate('/');
@@ -87,8 +76,6 @@ export default function InputForm({ setRefreshList, refreshList }) {
 
       setRefreshList(!refreshList);
       alert('Goal submitted successfully!');
-
-      // Reset form after successful submission
       setTitle('');
       setDescription('');
       setFrequency('');
@@ -115,18 +102,27 @@ export default function InputForm({ setRefreshList, refreshList }) {
   };
 
   return (
-    <Container maxWidth="sm">
+    <Container
+      maxWidth="sm"
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        px: { xs: 2, sm: 4 },
+      }}
+    >
       <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="100vh"
+        sx={{
+          width: '100%',
+          maxWidth: '500px',
+          p: { xs: 3, sm: 4 },
+          boxShadow: 3,
+          borderRadius: 2,
+          bgcolor: 'white',
+          mx: 'auto', // ✅ Ensures equal margin on left & right
+        }}
       >
-        <Grid
-          container
-          spacing={3}
-          sx={{ p: 3, boxShadow: 3, borderRadius: 2, bgcolor: 'white' }}
-        >
+        <Grid container spacing={2}>
           <Grid item xs={12}>
             <Typography variant="h5" fontWeight="bold" textAlign="center">
               Create Goal
